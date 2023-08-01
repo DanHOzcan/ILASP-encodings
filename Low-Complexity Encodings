@@ -1,1 +1,88 @@
+%% Stable Semantics %%%
+% Examples
 
+% If A attacks B and B attacks A and C over u, then u can be in the scope of A and C.
+#pos({scope(c,u),not_scope(b,u),scope(a,u)},
+     {not_scope(c,u),scope(b,u),not_scope(a,u)},{
+element(u).
+argument(a).
+argument(b).
+argument(c).
+domain(a,u).
+domain(b,u).
+domain(c,u).
+attacks(a,b).
+attacks(b,c).
+attacks(b,a).
+}).
+
+% If A attacks B and B attacks A and C over u, then u can be in the scope of B.
+#pos({not_scope(c,u),scope(b,u),not_scope(a,u)},
+     {scope(c,u),not_scope(b,u),scope(a,u)},{
+element(u).
+argument(a).
+argument(b).
+argument(c).
+domain(a,u).
+domain(b,u).
+domain(c,u).
+attacks(a,b).
+attacks(b,c).
+attacks(b,a).
+}).
+
+% If A and B in conflict over u, u can be in the scope of one and not the other – stable and CF.
+#pos({scope(a,u),not_scope(b,u)},{not_scope(a,u),scope(b,u)},{
+element(u).
+argument(a).
+argument(b).
+domain(a,u).
+domain(b,u).
+attacks(a,b).
+attacks(b,a).
+}).
+
+% If A and B in conflict over u, u cannot be in the scope of both (not conflict-free but stable)
+#neg({scope(a,u),scope(b,u)},{},{
+element(u).
+argument(a).
+argument(b).
+domain(a,u).
+domain(b,u).
+attacks(a,b).
+attacks(b,a).
+}).
+
+% If A and B in conflict over u, u cannot be in the scope of neither (conflict free but Not stable)
+#neg({not_scope(a,u),not_scope(b,u)},{},{
+element(u).
+argument(a).
+argument(b).
+domain(a,u).
+domain(b,u).
+attacks(a,b).
+attacks(b,a).
+}).
+
+% A cannot take on elements not in its domain (not compliant)
+#neg({scope(a,u),scope(b,u)},{},{
+element(u).
+argument(a).
+argument(b).
+domain(b,u).
+}).
+
+% Background
+
+argumentGetsAttackOn(A,U,B) :- domain(A,U), domain(B,U), attacks(B,A).
+
+% Mode Bias
+
+#modeh(not_scope(var(argument),var(element))).
+#modeh(scope(var(argument),var(element))).
+
+#modeb(scope(var(argument),var(element))).
+#modeb(domain(var(argument),var(element))).
+#modeb(not_scope(var(argument),var(element))).
+#modeb(argumentGetsAttackOn(var(argument),var(element),var(argument))).
+#maxv(3).
